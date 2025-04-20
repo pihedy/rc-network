@@ -1,0 +1,96 @@
+services:
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./api/public:/var/www/app:ro
+    depends_on:
+      - app_api
+      - app_socket
+    env_file:
+      - .env
+    networks:
+      - rcnet
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+  app_api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      args:
+        APP_DEBUG: ${APP_DEBUG}
+    volumes:
+      - ./docker/php/conf.d:/usr/local/etc/php/conf.d
+      - ./api:/var/www/app
+    environment:
+      - COMPOSER_ALLOW_SUPERUSER=1
+      - APP_DEBUG=${APP_DEBUG}
+    working_dir: /var/www/app
+    env_file:
+      - .env
+    networks:
+      - rcnet
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  app_socket:
+    build:
+      context: ./socket
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - ./socket:/app
+    command: ["npm", "run", "start"]
+    env_file:
+      - .env
+    networks:
+      - rcnet
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  app_controller:
+    build:
+      context: ./controller
+      dockerfile: Dockerfile
+    volumes:
+      - ./controller:/app
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+    restart: always
+    working_dir: /app
+    env_file:
+      - .env
+    networks:
+      - rcnet
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - rcnet
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+networks:
+  rcnet:
+    driver: bridge
