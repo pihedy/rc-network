@@ -21,3 +21,5 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+controller/__pycache__/
+socket/dist/*.js.map

@@ -1,0 +1,22 @@
+{
+    "name": "app_socket",
+    "version": "1.0.0",
+    "main": "dist/main.js",
+    "scripts": {
+        "start": "node dist/main.js",
+        "start:dev": "nodemon --watch src --exec ts-node src/main.ts",
+        "build": "tsc",
+        "build:dev": "tsc --sourceMap true"
+    },
+    "dependencies": {
+        "dotenv": "^16.4.0",
+        "ioredis": "^5.3.2",
+        "socket.io": "^4.7.2"
+    },
+    "devDependencies": {
+        "@types/node": "^20.4.2",
+        "nodemon": "^3.0.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.2.2"
+    }
+}
