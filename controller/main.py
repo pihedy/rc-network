@@ -1,10 +1,15 @@
-import os
-from serial_controller import run_serial_controller
-from mock_serial import run_mock_serial
+import time
 
-mock = os.environ.get("CONTROLLER_MOCK_SERIAL", "false").lower() == "true"
+from components.logger.log import setup_logger
+from components.redis.listener import listener
 
-if mock:
-    run_mock_serial()
-else:
-    run_serial_controller()
+import components.serial_comm.factory as serial_factory
+
+logger = setup_logger('test')
+serial = serial_factory.create_serial_communication()
+
+logger.info("Starting controller...")
+
+while True:
+    listener(logger, serial)
+    time.sleep(1)
